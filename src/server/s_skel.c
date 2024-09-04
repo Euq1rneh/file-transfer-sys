@@ -287,6 +287,26 @@ int handle_get(char *path, char *wd){
 
     fprintf(stderr, "Generated %ld chunks from file\n", nChunks);
 
+    size_t schunk_size;
+    unsigned char* serialized_chunk;
+
+    // Serialize each chunk
+    for (size_t i = 0; i < nChunks; i++)
+    {
+        schunk_size = serialize_chunk(chunks[i], serialized_chunk);
+        //send the chunk size
+        //send the chunk
+
+        //wait client received msg
+        //repeat
+
+        // Memory cleanup
+        free(chunks[i]->chunk);
+        free(chunks[i]);
+    }
+    
+
+    // Send each chunk individually
 
 }
 

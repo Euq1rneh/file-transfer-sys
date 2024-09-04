@@ -5,6 +5,8 @@
 
 #include "structures.h"
 
+int copy_to_from(void *dst, void *src, int src_start);
+
 int get_code_from_command(char *command);
 
 int file_exists(char *path);

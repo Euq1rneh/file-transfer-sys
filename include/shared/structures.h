@@ -27,7 +27,7 @@ typedef struct Message{
 /// @brief Represents file chunks and is used for file transfers
 typedef struct Chunk{
    int index; // index of the chunk
-   size_t size; // actual size of the chunk in case one chunk is smaller than the max size
+   uint64_t size; // actual size of the chunk in case one chunk is smaller than the max size
    unsigned char chunk[CHUNK_SIZE];
 } Chunk;
 

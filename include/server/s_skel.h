@@ -10,6 +10,7 @@
 #include "s_utils.h"
 #include "structures.h"
 #include "globals.h"
+#include "serialization.h"
 
 
 int handle_client(Operation *op, char *wd, int client_socket);

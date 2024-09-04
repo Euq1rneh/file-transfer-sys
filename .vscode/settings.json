@@ -5,6 +5,11 @@
         "c_stub.h": "c",
         "globals.h": "c",
         "c_network.h": "c",
-        "structures.h": "c"
+        "structures.h": "c",
+        "serialization.h": "c",
+        "s_utils.h": "c",
+        "s_skel.h": "c",
+        "stdlib.h": "c",
+        "stdint.h": "c"
     }
 }

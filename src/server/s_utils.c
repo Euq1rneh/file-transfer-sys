@@ -1,5 +1,14 @@
 #include "s_utils.h"
 
+/// @brief Copies all the elements from src to dst starting at a given index
+/// @param dst destination
+/// @param src source
+/// @param src_start index to start writting in src
+/// @return
+int copy_to_from(void *dst, void *src, int src_start)
+{
+}
+
 int get_code_from_command(char *command)
 {
 
@@ -98,7 +107,7 @@ size_t file_to_chunks(char *buffer, size_t buffer_size, Chunk **chunks)
         if (chunks[i] == -1)
         {
             fprintf(stderr, "Error allocating memory\n");
-            //TODO memory cleanup
+            // TODO memory cleanup
             return -1;
         }
 
@@ -106,9 +115,10 @@ size_t file_to_chunks(char *buffer, size_t buffer_size, Chunk **chunks)
         chunks[i]->index = i;
         chunks[i]->size = write_chunk((char *)chunks[i]->chunk, buffer, size, buff_pos); // writes the chunk
 
-        if(chunks[i]->size == -1){
+        if (chunks[i]->size == -1)
+        {
             fprintf(stderr, "Error chunking file\n");
-            //TODO memory cleanup
+            // TODO memory cleanup
             return -1;
         }
 
