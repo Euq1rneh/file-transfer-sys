@@ -17,3 +17,7 @@ int deserialize_int(uint8_t *in) {
            (in[2] << 8)  |
            in[3];
 }
+
+size_t serialize_message(){
+    
+}

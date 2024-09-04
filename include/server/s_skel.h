@@ -7,6 +7,7 @@
 #include <pwd.h>
 
 #include "s_private.h"
+#include "s_utils.h"
 #include "structures.h"
 #include "globals.h"
 

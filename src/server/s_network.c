@@ -75,7 +75,6 @@ int network_main_loop(int listening_socket, char *wd)
         printf("Client connection established\n");
         // loop de pedidos do cliente aceite
 
-
         printf("Client connection closed\n");
         close(connsockfd);
     }

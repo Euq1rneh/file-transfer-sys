@@ -257,6 +257,40 @@ int handle_ls(char *path, char *wd, Package *pkg)
     return entries;
 }
 
+
+int handle_get(char *path, char *wd){
+
+    if(file_exists(path) == -1){
+        fprintf(stderr, "File at path %s does not exist\n", path);
+        return -1;
+    }
+
+    char *buffer;
+
+    size_t nbytes = file_to_byte_array(path, buffer);
+
+    if(nbytes == -1){
+        fprintf(stderr, "Error reading file at path %s\n", path);
+        return -1;
+    }
+
+    fprintf(stderr, "Read %ld bytes\n", nbytes);
+
+    Chunk **chunks;
+    size_t nChunks = file_to_chunks(buffer, nbytes, chunks);
+
+    if(nChunks == -1){
+        fprintf(stderr, "Error while trying to get file chunks\n");
+        //TODO memory cleanup
+        return -1;
+    }
+
+    fprintf(stderr, "Generated %ld chunks from file\n", nChunks);
+
+
+}
+
+
 int handle_client(Operation *op, char *wd, int sockfd)
 {
     char *path = NULL;
