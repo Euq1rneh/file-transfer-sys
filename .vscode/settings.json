@@ -1,0 +1,10 @@
+{
+    "makefile.configureOnOpen": false,
+    "files.associations": {
+        "stdio.h": "c",
+        "c_stub.h": "c",
+        "globals.h": "c",
+        "c_network.h": "c",
+        "structures.h": "c"
+    }
+}

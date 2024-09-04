@@ -42,7 +42,7 @@ int rtable_disconnect(struct rtable_t *rtable)
         return -1;
     }
 
-    // Fechar a conexão com o servidor
+    // Fŵechar a conexão com o servidor
     if (network_close(rtable) == -1)
     {
         if (rtable->server_address != NULL)
@@ -67,7 +67,54 @@ int rtable_disconnect(struct rtable_t *rtable)
 
 char *change_working_dir(char *path, struct rtable_t *rtable)
 {
-   
+    Message *msg = malloc(sizeof(struct Message));
+
+    msg->operation = 2;
+
+    if(path == NULL){
+        msg->data = malloc(1);
+
+        if(msg->data == -1){
+            fprintf(stderr, "Error allocating memory. Exiting program...\n");
+            exit(-1);
+        }
+
+        msg->size = 0;
+    }else{
+        size_t path_size = strlen(path);
+        msg->data = malloc(sizeof(char) * (path_size + 1));
+
+        if(msg->data == -1){
+            fprintf(stderr, "Error allocating memory. Exiting program...\n");
+            exit(-1);
+        }
+
+        msg->size = path_size + 1;
+    }
+
+    if(write_all(rtable->sockfd, msg, sizeof(struct Message)) == -1){
+        fprintf(stderr, "Error while trying to write message to server. Closing program\n");
+        exit(-1);
+    }
+
+    free(msg->data);
+
+    int r = read_all(rtable->sockfd, msg, sizeof(struct Message));
+
+    if(r == -1){
+        fprintf(stderr, "Error while trying to read message from server. Discarding message\n");
+        return NULL;
+    }else if(r == 0){
+        fprintf(stderr, "EOF detected while reading message from server\n");
+    }
+
+    char *new_wd = malloc(sizeof(char) * msg->size);
+
+    strcpy(new_wd, (char*)msg->data);
+
+    //need to free msg
+
+    return new_wd;
 }
 
 int list_files(char *path, char *working_dir, struct rtable_t *rtable)

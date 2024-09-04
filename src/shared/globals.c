@@ -54,7 +54,7 @@ int receive_int(int *num, int fd)
     return 0;
 }
 
-int write_all(int fd, int *buf, int len){
+int write_all(int fd, void *buf, int len){
     int bufsize = len;
     while (len > 0){
         int res = write(fd, buf, len);
@@ -71,7 +71,7 @@ int write_all(int fd, int *buf, int len){
     return bufsize;
 }
 
-int read_all(int fd, int *buf, int len) {
+int read_all(int fd, void *buf, int len) {
     int bufsize = len;
     while (len > 0) {
         int res = read(fd, buf, len);

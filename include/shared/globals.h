@@ -23,7 +23,7 @@ int receive_int(int *num, int fd);
 /// @param buf the buffer containing the data
 /// @param len the size of the buffer
 /// @return the number of bytes that were written or -1 if there was an error
-int write_all(int fd, int *buf, int len);
+int write_all(int fd, void *buf, int len);
 
 
 /// @brief Reads the contents of the message sent by the socket to a buffer with the specified size
@@ -31,6 +31,6 @@ int write_all(int fd, int *buf, int len);
 /// @param buf the buffer to write to
 /// @param len the size of the buffer
 /// @return the number of bytes read, -1 in case of error or 0 if EOF
-int read_all(int fd, int *buf, int len); 
+int read_all(int fd, void *buf, int len); 
 
 #endif

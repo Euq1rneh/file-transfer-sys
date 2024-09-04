@@ -9,6 +9,7 @@
 #include "c_private.h"
 #include "c_network.h"
 #include "globals.h"
+#include "structures.h"
 
 
 /// @brief Attemps to connect to the server
