@@ -5,7 +5,7 @@
 
 #include "structures.h"
 
-int copy_to_from(void *dst, void *src, int src_start);
+int copy_to_from(void *dst, void *src, int src_start, size_t size);
 
 int get_code_from_command(char *command);
 

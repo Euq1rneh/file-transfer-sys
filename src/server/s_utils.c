@@ -5,8 +5,19 @@
 /// @param src source
 /// @param src_start index to start writting in src
 /// @return
-int copy_to_from(void *dst, void *src, int src_start)
+int copy_to_from(void *dst, void *src, int src_start, size_t size)
 {
+    if (dst == NULL || src == NULL || src_start < 0)
+    {
+        fprintf(stderr, "Incompatible arguments.\n");
+        return -1;
+    }
+
+    void *start = src + src_start;
+    // does not check if the dst if the memory allocated is equal to  size
+    memcpy(dst, start, size);
+
+    return 0;
 }
 
 int get_code_from_command(char *command)

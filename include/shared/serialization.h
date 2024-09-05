@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "structures.h"
+#include "s_utils.h"
 
 /// @brief Deserializes data to its expected type
 /// @param data data to deserialize
