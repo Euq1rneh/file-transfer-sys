@@ -1,5 +1,56 @@
 #include "s_skel.h"
 
+/// @brief Receives a message from the client in byte form, deserializes it and return it
+/// @param client_socket client socket
+/// @param expectedType the expected message type (Message, Chunk) 
+/// @return the deserialized message written into the according data type or NULL in case of error
+void *receive(int client_socket, StructTypes expected_type)
+{
+    // receives the size of the message
+    int msg_size = 0;
+    if(receive_int(&msg_size, client_socket) == -1){
+        fprintf(stderr, "Error receinving msg size\n");
+        return NULL;
+    }
+    // receives the message
+    unsigned char *buffer = malloc(msg_size);
+    int r = read_all(client_socket, buffer, msg_size);
+    if(r == -1){
+        fprintf(stderr, "Error while reading message from client\n");
+    }
+
+    if(r != msg_size){
+        fprintf(stderr, "Size of message that was read does not have the same size and may be incomplete\n");
+    }
+
+    void *deserialized_buffer = deserialize(buffer, expected_type);
+
+    if(deserialized_buffer == NULL){
+        fprintf(stderr, "There was an error while trying to deserialize the message.\n");
+        return NULL;
+    }
+
+    return deserialized_buffer;
+}
+
+void send(int client_socket, void *data, size_t size)
+{
+    // sends the size of the message
+    if (send_int(size, client_socket) == -1)
+    {
+        // client connection is closed
+        fprintf(stderr, "Error sending message size to client\n");
+        exit(-1);
+    }
+    // sends the message
+    int r = write_all(client_socket, data, size);
+    if (r == -1 || r != size)
+    {
+        fprintf(stderr, "Error sending message or bytes sent are different from message size\n");
+        return;
+    }
+}
+
 int handle_cd(char *path, char *wd, Package *pkg)
 {
     DIR *dir_stream;
@@ -257,10 +308,11 @@ int handle_ls(char *path, char *wd, Package *pkg)
     return entries;
 }
 
+int handle_get(int client_socket, char *path, char *wd)
+{
 
-int handle_get(char *path, char *wd){
-
-    if(file_exists(path) == -1){
+    if (file_exists(path) == -1)
+    {
         fprintf(stderr, "File at path %s does not exist\n", path);
         return -1;
     }
@@ -269,7 +321,8 @@ int handle_get(char *path, char *wd){
 
     size_t nbytes = file_to_byte_array(path, buffer);
 
-    if(nbytes == -1){
+    if (nbytes == -1)
+    {
         fprintf(stderr, "Error reading file at path %s\n", path);
         return -1;
     }
@@ -279,44 +332,54 @@ int handle_get(char *path, char *wd){
     Chunk **chunks;
     size_t nChunks = file_to_chunks(buffer, nbytes, chunks);
 
-    if(nChunks == -1){
+    if (nChunks == -1)
+    {
         fprintf(stderr, "Error while trying to get file chunks\n");
-        //TODO memory cleanup
+        // TODO memory cleanup
+        return -1;
+    }
+
+    // send number of chunks
+    if (send_int(nChunks, client_socket) == -1)
+    {
+        fprintf(stderr, "Error sending number of chunks\n");
+        // TODO memory cleanup
         return -1;
     }
 
     fprintf(stderr, "Generated %ld chunks from file\n", nChunks);
 
     size_t schunk_size;
-    unsigned char* serialized_chunk;
+    unsigned char *serialized_chunk;
 
-    // Serialize each chunk
     for (size_t i = 0; i < nChunks; i++)
     {
         schunk_size = serialize_chunk(chunks[i], serialized_chunk);
-        //send the chunk size
-        //send the chunk
-
-        //wait client received msg
-        //repeat
-
+        // send the chunk size
+        // send the chunk
+        send(client_socket, chunks[i], schunk_size);
+        // wait client received msg
+        int response = -1;
+        if(receive_int(&response, client_socket) == -1){
+            fprintf(stderr, "Error retrieving client response\n");
+            //TODO memory cleanup
+            return -1;
+        }
+        // repeat
         // Memory cleanup
         free(chunks[i]->chunk);
         free(chunks[i]);
     }
-    
 
-    // Send each chunk individually
-
+    return 0;
 }
 
-
-int handle_client(Operation *op, char *wd, int sockfd)
+int handle_client(char *wd, int sockfd)
 {
     char *path = NULL;
-    Package *pkg;
+    int op_code = -1;    
 
-    switch (op->op_code)
+    switch (op_code)
     {
     case 1: // ls comand
         break;
@@ -325,7 +388,6 @@ int handle_client(Operation *op, char *wd, int sockfd)
 
         break;
     case 3: // get command
-        /* code */
         break;
     case 4: // put command
 

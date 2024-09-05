@@ -3,6 +3,12 @@
 
 #include "structures.h"
 
+/// @brief Deserializes data to its expected type
+/// @param data data to deserialize
+/// @param expected_type expected type (Message or Chunk)
+/// @return deserialized data or NULL in case of error
+void *deserialize(void * data, StructTypes expected_type);
+
 /// @brief Serializes an int
 /// @param value int to serialize
 /// @param buffer buffer to write the serialized value

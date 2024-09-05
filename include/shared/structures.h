@@ -5,6 +5,11 @@
 
 #define CHUNK_SIZE 512000 // 500KiB
 
+typedef enum StructTypes{
+   ST_MESSAGE,
+   ST_CHUNK
+} StructTypes;
+
 // this struct is used to tell the server and client some usefull data 
 // before executing a request
 typedef struct Package
