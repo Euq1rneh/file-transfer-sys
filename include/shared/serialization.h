@@ -13,8 +13,7 @@ void *deserialize(void * data, StructTypes expected_type);
 /// @brief Serializes an int
 /// @param value int to serialize
 /// @param buffer buffer to write the serialized value
-/// @return the serialized value
-uint8_t serialize_int(int value, uint8_t *buffer);
+void serialize_int(int value, uint8_t *buffer);
 
 
 /// @brief Deserializes an int 

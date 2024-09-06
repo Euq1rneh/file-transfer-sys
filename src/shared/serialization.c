@@ -16,7 +16,7 @@ void *deserialize(void *data, StructTypes expected_Type)
     }
 }
 
-uint8_t serialize_int(int value, uint8_t *buffer)
+void serialize_int(int value, uint8_t *buffer)
 {
     buffer[0] = (value >> 24) & 0xFF;
     buffer[1] = (value >> 16) & 0xFF;

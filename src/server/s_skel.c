@@ -2,30 +2,34 @@
 
 /// @brief Receives a message from the client in byte form, deserializes it and return it
 /// @param client_socket client socket
-/// @param expectedType the expected message type (Message, Chunk) 
+/// @param expectedType the expected message type (Message, Chunk)
 /// @return the deserialized message written into the according data type or NULL in case of error
 void *receive(int client_socket, StructTypes expected_type)
 {
     // receives the size of the message
     int msg_size = 0;
-    if(receive_int(&msg_size, client_socket) == -1){
+    if (receive_int(&msg_size, client_socket) == -1)
+    {
         fprintf(stderr, "Error receinving msg size\n");
         return NULL;
     }
     // receives the message
     unsigned char *buffer = malloc(msg_size);
     int r = read_all(client_socket, buffer, msg_size);
-    if(r == -1){
+    if (r == -1)
+    {
         fprintf(stderr, "Error while reading message from client\n");
     }
 
-    if(r != msg_size){
+    if (r != msg_size)
+    {
         fprintf(stderr, "Size of message that was read does not have the same size and may be incomplete\n");
     }
 
     void *deserialized_buffer = deserialize(buffer, expected_type);
 
-    if(deserialized_buffer == NULL){
+    if (deserialized_buffer == NULL)
+    {
         fprintf(stderr, "There was an error while trying to deserialize the message.\n");
         return NULL;
     }
@@ -360,9 +364,10 @@ int handle_get(int client_socket, char *path, char *wd)
         send(client_socket, chunks[i], schunk_size);
         // wait client received msg
         int response = -1;
-        if(receive_int(&response, client_socket) == -1){
+        if (receive_int(&response, client_socket) == -1)
+        {
             fprintf(stderr, "Error retrieving client response\n");
-            //TODO memory cleanup
+            // TODO memory cleanup
             return -1;
         }
         // repeat
@@ -376,26 +381,37 @@ int handle_get(int client_socket, char *path, char *wd)
 
 int handle_client(char *wd, int sockfd)
 {
-    char *path = NULL;
-    int op_code = -1;    
+    Message *msg = malloc(sizeof(Message));
 
-    switch (op_code)
+    if (msg == -1)
+    {
+        fprintf(stderr, "Error allocating memory\n");
+        exit(-1);
+    }
+
+    msg = receive(sockfd, ST_MESSAGE);
+
+    int r = 0;
+
+    switch (msg->operation)
     {
     case 1: // ls comand
+
         break;
 
     case 2: // cd command
 
         break;
     case 3: // get command
-        break;
-    case 4: // put command
-
+        if(handle_get(sockfd, msg->data, wd) == -1){
+            fprintf(stderr, "---ERR:Could not process get request---\n");
+        }
         break;
     case 10: // quit
 
         break;
     default:
+        fprintf(stderr, "Could not process command with code %d", msg->operation);
         break;
     }
 
