@@ -2,16 +2,31 @@
 
 void *deserialize(void *data, StructTypes expected_Type)
 {
+    size_t size;
     switch (expected_Type)
     {
     case ST_CHUNK:
         Chunk *chunk;
-        deserialize_chunk(data, chunk);
+        size = deserialize_chunk(data, chunk);
+
+        if (size == -1)
+        {
+            fprintf(stderr, "Error deserializing chunk\n");
+            return NULL;
+        }
 
         return chunk;
         break;
     case ST_MESSAGE:
-        deserialize_message();
+        Message *msg;
+        size = deserialize_message(data, msg);
+
+        if (size == -1)
+        {
+            fprintf(stderr, "Error deserializing message\n");
+            return NULL;
+        }
+        return msg;
         break;
     }
 }
@@ -87,35 +102,61 @@ int deserialize_int(uint8_t *in)
            in[3];
 }
 
-size_t deserialize_message()
+size_t deserialize_message(unsigned char *data, Message *msg)
 {
+    //        int operation;
+    //    size_t size;
+    //    void *data;
+
+    if(msg == NULL){
+        fprintf(stderr, "No message buffer was provided\n");
+        return -1;
+    }
+
+    if(data == NULL){
+        fprintf(stderr, "No deserialization data was provided\n");
+        return -1;
+    }
+
+    msg->operation = deserialize_int(data); //int
+    msg->size = deserialize_uint64(data, 4); //uint64
+    msg->data = malloc(sizeof(char *) * msg->size);
+    
+    if(msg->data == NULL){
+        fprintf(stderr, "Error allocating memory\n");
+        exit(-1);
+    }
+
     return -1;
 }
 
 size_t deserialize_chunk(unsigned char *buffer, Chunk *chunk)
 {
-    //buffer 
-    //malloc(sizeof(uint8_t) * 9 + sizeof(unsigned char) * chunk->size);
+    // buffer
+    // malloc(sizeof(uint8_t) * 9 + sizeof(unsigned char) * chunk->size);
     chunk = malloc(sizeof(Chunk));
 
-    if(chunk == -1){
+    if (chunk == -1)
+    {
         fprintf(stderr, "Error allocating memory\n");
         exit(-1);
     }
 
     int start_index = 0;
     chunk->index = deserialize_int(buffer);
-    start_index +=4;
+    start_index += 4;
     chunk->size = deserialize_uint64(buffer, start_index);
-    start_index +=8; // 12
+    start_index += 8; // 12
     unsigned char *c = malloc(sizeof(unsigned char) * chunk->size);
 
-    if (c == -1){
+    if (c == -1)
+    {
         fprintf(stderr, "Error allocating memory\n");
         exit(-1);
     }
 
-    if(copy_to_from(c, buffer, start_index, chunk->size) == -1){
+    if (copy_to_from(c, buffer, start_index, chunk->size) == -1)
+    {
         fprintf(stderr, "Error retrueving chunk from serialized message\n");
         return -1;
     }
