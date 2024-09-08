@@ -33,10 +33,8 @@ void *deserialize(void *data, StructTypes expected_Type)
 
 void serialize_int(int value, uint8_t *buffer)
 {
-    buffer[0] = (value >> 24) & 0xFF;
-    buffer[1] = (value >> 16) & 0xFF;
-    buffer[2] = (value >> 8) & 0xFF;
-    buffer[3] = value & 0xFF;
+    uint32_t net_order = htonl(value);  // Convert to network byte order
+    memcpy(buffer, &net_order, sizeof(net_order));  // Copy to buffer
 }
 
 size_t serialize_message()
@@ -94,12 +92,11 @@ uint64_t deserialize_uint64(const uint8_t *buffer, int start_index)
     return value;
 }
 
-int deserialize_int(uint8_t *in)
+int deserialize_int(uint8_t *buffer)
 {
-    return (in[0] << 24) |
-           (in[1] << 16) |
-           (in[2] << 8) |
-           in[3];
+    uint32_t net_order;
+    memcpy(&net_order, buffer, sizeof(net_order));  // Copy from buffer
+    return ntohl(net_order);  // Convert back to host byte order
 }
 
 size_t deserialize_message(unsigned char *data, Message *msg)
@@ -108,26 +105,29 @@ size_t deserialize_message(unsigned char *data, Message *msg)
     //    size_t size;
     //    void *data;
 
-    if(msg == NULL){
+    if (msg == NULL)
+    {
         fprintf(stderr, "No message buffer was provided\n");
         return -1;
     }
 
-    if(data == NULL){
+    if (data == NULL)
+    {
         fprintf(stderr, "No deserialization data was provided\n");
         return -1;
     }
 
-    msg->operation = deserialize_int(data); //int
-    msg->size = deserialize_uint64(data, 4); //uint64
+    msg->operation = deserialize_int(data);  // int
+    msg->size = deserialize_uint64(data, 4); // uint64
     msg->data = malloc(sizeof(char *) * msg->size);
-    
-    if(msg->data == NULL){
+
+    if (msg->data == NULL)
+    {
         fprintf(stderr, "Error allocating memory\n");
         exit(-1);
     }
 
-    return -1;
+    return 0;
 }
 
 size_t deserialize_chunk(unsigned char *buffer, Chunk *chunk)
