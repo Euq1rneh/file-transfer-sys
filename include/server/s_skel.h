@@ -13,5 +13,5 @@
 #include "serialization.h"
 
 
-int handle_client(Operation *op, char *wd, int client_socket);
+int handle_client(char *wd, int client_socket);
 

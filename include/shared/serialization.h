@@ -1,5 +1,9 @@
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
+#include <arpa/inet.h>
+#include <stdlib.h>
+
 
 #include "structures.h"
 #include "s_utils.h"
@@ -21,18 +25,18 @@ void serialize_int(int value, uint8_t *buffer);
 /// @return the deserialized int value
 int deserialize_int(uint8_t *in);
 
-size_t serialize_message();
+size_t serialize_message(Message *msg, char **buffer, size_t message_size);
 
-size_t deserialize_message();
+size_t deserialize_message(unsigned char *data, Message *msg);
 
 /// @brief Serializes a file chunk
 /// @param chunk chunk to serialize
 /// @param buffer output buffer
 /// @return returns the size of the output buffer
-size_t serialize_chunk(Chunk *chunk, unsigned char *buffer);
+void serialize_chunk(struct Chunk *chunk, char **buffer, size_t *total_size);
 
 /// @brief Deserializes a file chunk
 /// @param buffer buffer to deserialize
 /// @param chunk output chunk
 /// @return returns the size of the deserialized data
-size_t deserialize_chunk(unsigned char *buffer, Chunk chunk);
+size_t deserialize_chunk(struct Chunk *chunk, char *buffer);

@@ -357,11 +357,15 @@ int handle_get(int client_socket, char *path, char *wd)
     unsigned char *serialized_chunk;
 
     for (size_t i = 0; i < nChunks; i++)
-    {
-        schunk_size = serialize_chunk(chunks[i], serialized_chunk);
+    {   
+        size_t chunk_size = 0;
+        serialize_chunk(chunks[i], serialized_chunk, &chunk_size);
         // send the chunk size
+
+        
+
         // send the chunk
-        send(client_socket, chunks[i], schunk_size);
+        send(client_socket, chunks[i], chunk_size);
         // wait client received msg
         int response = -1;
         if (receive_int(&response, client_socket) == -1)

@@ -44,13 +44,16 @@ int file_exists(char *path)
 
 size_t file_to_byte_array(char *path, char *buffer)
 {
-    FILE *fileptr;
-    size_t size;
+    FILE *fileptr = fopen(path, "rb"); // Open the file in binary mode
+    if (fileptr == NULL)
+    {
+        perror("Error opening file");
+        return 0;
+    }
 
-    fileptr = fopen(path, "rb"); // Open the file in binary mode
-    size = get_file_size(fileptr);
+    size_t size = get_file_size(fileptr);
 
-    buffer = (char *)malloc(size * sizeof(char));
+    // Read the file into the existing buffer
     fread(buffer, size, 1, fileptr);
     fclose(fileptr);
 
