@@ -20,7 +20,7 @@ int main() {
     // Step 3: Create and populate the Message struct
     struct Message message;
     message.operation = 1;
-    char data[] = "This is the client message. Above this message is the operation code\n";
+    char data[] = "Hello";
     message.size = sizeof(data);
     message.data = data;
 
@@ -28,6 +28,10 @@ int main() {
     char *buffer;
     size_t total_size;
     serialize_message(&message, &buffer, &total_size);
+
+    total_size = to_network_size(total_size);
+
+    send(client_socket, &total_size, sizeof(size_t), 0);
 
     // Step 5: Send the serialized data to the server
     send(client_socket, buffer, total_size, 0);

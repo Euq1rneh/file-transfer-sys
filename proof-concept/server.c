@@ -6,19 +6,19 @@
 #include <unistd.h>
 
 void handle_client(int client_socket) {
-    // Step 1: Receive the operation and size fields
-    size_t header_size = sizeof(int) + sizeof(size_t);
-    char header_buffer[header_size];
+
+    size_t msg_size = 0;
+
+    recv(client_socket, &msg_size, sizeof(size_t), 0);
+
+    msg_size = to_host_size(msg_size);
+    char buffer[msg_size];
     
-    recv(client_socket, header_buffer, header_size, 0);
+    recv(client_socket, buffer, msg_size, 0);
 
     // Step 2: Deserialize the message (header part first)
     struct Message received_message;
-    deserialize_message(&received_message, header_buffer);
-
-    // Step 3: Receive the actual data based on size
-    received_message.data = malloc(received_message.size);
-    recv(client_socket, received_message.data, received_message.size, 0);
+    deserialize_message(&received_message, buffer);
 
     // Step 4: Output the received message
     printf("Received operation: %d\n", received_message.operation);
