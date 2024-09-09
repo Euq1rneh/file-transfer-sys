@@ -197,7 +197,7 @@ int get_file(char *path, struct rtable_t *rtable)
             fprintf(stderr, "Error receiving file chunk size\n");
             return -1;
         }
-        // receive chunk        
+        // receive chunk
         char buffer[current_chunk_size];
 
         if (recv(rtable->sockfd, &buffer, current_chunk_size, 0) == -1)
@@ -215,10 +215,14 @@ int get_file(char *path, struct rtable_t *rtable)
         fprintf(stderr, "Updating file size...\n");
         file_size += current_chunk.size;
         fprintf(stderr, "New file size: %ld\n", file_size);
-        
     }
 
     // rebuild file based on array of chunks and file size
+    if (rebuild_file(chunks, num_chunks, "test") == -1) // retrieve original file name from path parameter
+    {
+        fprintf(stderr, "Error rebuilding file\n");
+        return -1;
+    }
     // free all the memory used for recreating the file (chunk array)
 
     return 0;

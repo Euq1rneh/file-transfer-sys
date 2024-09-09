@@ -2,6 +2,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "structures.h"
+
 /// @brief Prints a progress bar
 /// @param count the current value
 /// @param max the maximum value
@@ -19,3 +21,9 @@ char *read_stdin();
 char** str_split(const char *str, const char *delimiter, int *size);
 
 char *get_separator();
+
+/// @brief Rebuilds the original file using the chunks received from the server
+/// @param chunks the array that contains all the file chunks
+/// @param num_chunks number of chunks in the array
+/// @return 0 if the file was successfuly rebuilt -1 otherwise
+int rebuild_file(Chunk *chunks, int num_chunks, char*filepath);

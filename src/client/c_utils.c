@@ -106,3 +106,26 @@ char **str_split(const char *str, const char *delimiter, int *size)
     free(str_copy); // Free the temporary string copy
     return result;
 }
+
+
+int rebuild_file(struct Chunk *chunks, int num_chunks, char *filepath) {
+    FILE *file = fopen(filepath, "wb");
+    if (file == NULL) {
+        perror("Error opening file for writing");
+        return -1;
+    }
+
+    for (int i = 0; i < num_chunks; i++) {
+        size_t bytes_written = fwrite(chunks[i].chunk, sizeof(unsigned char), chunks[i].size, file);
+
+        if (bytes_written != chunks[i].size) {
+            perror("Error writing chunk data to file");
+            fclose(file);
+            return -1;
+        }
+    }
+
+    fclose(file);
+
+    return 0;
+}
