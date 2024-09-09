@@ -78,8 +78,6 @@ void *deserialize(void *data, StructTypes expected_Type)
 
 size_t serialize_message(Message *msg, char **buffer, size_t messag_size)
 {
-    *buffer = malloc(messag_size);
-
     int operation_net = to_network_int(msg->operation);
     size_t size_net = to_network_size(msg->size);
 

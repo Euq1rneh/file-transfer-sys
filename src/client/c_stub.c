@@ -67,54 +67,61 @@ int rtable_disconnect(struct rtable_t *rtable)
 
 char *change_working_dir(char *path, struct rtable_t *rtable)
 {
-    Message *msg = malloc(sizeof(struct Message));
-
-    msg->operation = 2;
+    Message msg;
+    msg.operation = 2;
 
     if(path == NULL){
-        msg->data = malloc(1);
-
-        if(msg->data == -1){
-            fprintf(stderr, "Error allocating memory. Exiting program...\n");
-            exit(-1);
-        }
-
-        msg->size = 0;
+        msg.data = "";
+        msg.size = 0;
     }else{
-        size_t path_size = strlen(path);
-        msg->data = malloc(sizeof(char) * (path_size + 1));
-
-        if(msg->data == -1){
-            fprintf(stderr, "Error allocating memory. Exiting program...\n");
-            exit(-1);
-        }
-
-        msg->size = path_size + 1;
+        msg.data = path;
+        msg.size = strlen(path) + 1;
     }
 
-    serialize_message(msg, buffer, msg_size);
+    // SENDING MESSAGE
+    size_t total_size = sizeof(int) + sizeof(size_t) + msg.size;
+    char *buffer = malloc(total_size);
+    
+    serialize_message(&msg, buffer, &total_size);
 
-    if(write_all(rtable->sockfd, msg, sizeof(struct Message)) == -1){
-        fprintf(stderr, "Error while trying to write message to server. Closing program\n");
-        exit(-1);
-    }
+    total_size = to_network_size(total_size);
 
-    free(msg->data);
-
-    int r = read_all(rtable->sockfd, msg, sizeof(struct Message));
-
-    if(r == -1){
-        fprintf(stderr, "Error while trying to read message from server. Discarding message\n");
+    if(send(rtable->sockfd, &total_size, sizeof(size_t), 0) == -1){
+        fprintf(stderr, "Error sending message size\n");
         return NULL;
-    }else if(r == 0){
-        fprintf(stderr, "EOF detected while reading message from server\n");
     }
 
-    char *new_wd = malloc(sizeof(char) * msg->size);
+    if(send(rtable->sockfd, buffer, total_size, 0) == -1){
+        fprintf(stderr, "Error sending message to server\n");
+        return NULL;
+    }
 
-    strcpy(new_wd, (char*)msg->data);
+    //TODO memory cleanup from the serialization
 
-    //need to free msg
+    //RECEIVING MESSAGE
+
+    size_t recv_msg_size = 0;
+
+    if(recv(rtable->sockfd, recv_msg_size, sizeof(size_t), 0) == -1){
+        fprintf(stderr, "Error receiving message size from server\n");
+        return NULL;
+    }
+
+    char buffer[recv_msg_size];
+
+    if(recv(rtable->sockfd, &buffer, recv_msg_size, 0) == -1){
+        fprintf(stderr, "Error receiving message from server\n");
+        return NULL;
+    }
+
+    deserialize_message(buffer, &msg);
+
+
+    char *new_wd = malloc(sizeof(char) * msg.size);
+
+    strcpy(new_wd, (char*)msg.data);
+
+    //TODO memory cleanup from deserializing message
 
     return new_wd;
 }

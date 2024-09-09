@@ -8,6 +8,9 @@
 #include "structures.h"
 #include "s_utils.h"
 
+size_t to_network_size(size_t host_size);
+size_t to_host_size(size_t net_size);
+
 /// @brief Deserializes data to its expected type
 /// @param data data to deserialize
 /// @param expected_type expected type (Message or Chunk)
