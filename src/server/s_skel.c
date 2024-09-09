@@ -318,6 +318,7 @@ int handle_get(int client_socket, char *path, char *wd)
     if (file_exists(path) == -1)
     {
         fprintf(stderr, "File at path %s does not exist\n", path);
+        send_int(-1, client_socket);
         return -1;
     }
 
@@ -328,6 +329,7 @@ int handle_get(int client_socket, char *path, char *wd)
     if (nbytes == -1)
     {
         fprintf(stderr, "Error reading file at path %s\n", path);
+        send_int(-1, client_socket);
         return -1;
     }
 

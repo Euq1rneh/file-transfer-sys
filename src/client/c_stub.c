@@ -42,7 +42,7 @@ int rtable_disconnect(struct rtable_t *rtable)
         return -1;
     }
 
-    // Fŵechar a conexão com o servidor
+    // Fechar a conexão com o servidor
     if (network_close(rtable) == -1)
     {
         if (rtable->server_address != NULL)
@@ -70,10 +70,13 @@ char *change_working_dir(char *path, struct rtable_t *rtable)
     Message msg;
     msg.operation = 2;
 
-    if(path == NULL){
+    if (path == NULL)
+    {
         msg.data = "";
         msg.size = 0;
-    }else{
+    }
+    else
+    {
         msg.data = path;
         msg.size = strlen(path) + 1;
     }
@@ -81,199 +84,142 @@ char *change_working_dir(char *path, struct rtable_t *rtable)
     // SENDING MESSAGE
     size_t total_size = sizeof(int) + sizeof(size_t) + msg.size;
     char *buffer = malloc(total_size);
-    
+
     serialize_message(&msg, buffer, &total_size);
 
     total_size = to_network_size(total_size);
 
-    if(send(rtable->sockfd, &total_size, sizeof(size_t), 0) == -1){
+    if (send(rtable->sockfd, &total_size, sizeof(size_t), 0) == -1)
+    {
         fprintf(stderr, "Error sending message size\n");
         return NULL;
     }
 
-    if(send(rtable->sockfd, buffer, total_size, 0) == -1){
+    if (send(rtable->sockfd, buffer, total_size, 0) == -1)
+    {
         fprintf(stderr, "Error sending message to server\n");
         return NULL;
     }
 
-    //TODO memory cleanup from the serialization
+    // TODO memory cleanup from the serialization
 
-    //RECEIVING MESSAGE
+    // RECEIVING MESSAGE
 
     size_t recv_msg_size = 0;
 
-    if(recv(rtable->sockfd, recv_msg_size, sizeof(size_t), 0) == -1){
+    if (recv(rtable->sockfd, recv_msg_size, sizeof(size_t), 0) == -1)
+    {
         fprintf(stderr, "Error receiving message size from server\n");
         return NULL;
     }
 
     char buffer[recv_msg_size];
 
-    if(recv(rtable->sockfd, &buffer, recv_msg_size, 0) == -1){
+    if (recv(rtable->sockfd, &buffer, recv_msg_size, 0) == -1)
+    {
         fprintf(stderr, "Error receiving message from server\n");
         return NULL;
     }
 
     deserialize_message(buffer, &msg);
 
-
     char *new_wd = malloc(sizeof(char) * msg.size);
 
-    strcpy(new_wd, (char*)msg.data);
+    strcpy(new_wd, (char *)msg.data);
 
-    //TODO memory cleanup from deserializing message
+    // TODO memory cleanup from deserializing message
 
     return new_wd;
 }
 
 int list_files(char *path, char *working_dir, struct rtable_t *rtable)
 {
-
 }
 
-//              CD
+int get_file(char *path, struct rtable_t *rtable)
+{
 
-    // DIR *dir_stream;
-    // char *new_path;
+    if (path == NULL || strcmp(path, "") == 0 || strcmp(path, " ") == 0)
+    {
+        return -1;
+    }
 
-    // if (path == NULL)
-    // {
-    //     struct passwd *pw = getpwuid(getuid());
-    //     const char *homedir = pw->pw_dir;
+    Message msg;
+    msg.operation = 2;
+    msg.size = strlen(path) + 1;
+    msg.data = path;
 
-    //     char *new_wd = strdup(homedir);
-    //     return new_wd;
-    // }
+    // SENDING MESSAGE
+    size_t total_size = sizeof(int) + sizeof(size_t) + msg.size;
+    char *buffer = malloc(total_size);
 
-    // if (strcmp(path, "..") == 0)
-    // {
+    serialize_message(&msg, buffer, &total_size);
 
-    //     if (strcmp(working_dir, "/") == 0)
-    //     {
-    //         return NULL;
-    //     }
+    total_size = to_network_size(total_size);
+    // sending message size
+    if (send(rtable->sockfd, &total_size, sizeof(size_t), 0) == -1)
+    {
+        fprintf(stderr, "Error sending message size\n");
+        return NULL;
+    }
+    // sending message
+    if (send(rtable->sockfd, buffer, total_size, 0) == -1)
+    {
+        fprintf(stderr, "Error sending message to server\n");
+        return NULL;
+    }
 
-    //     // if num occurrence of '/' = 1 return "/" as the new path
-    //     char *first_separator = strchr(working_dir, kPathSeparator[0]);
-    //     char *last_separator = strrchr(working_dir, kPathSeparator[0]); // get the last occurrence of the file separator
+    // TODO memory cleanup from the serialization
 
-    //     if (last_separator == NULL || first_separator == NULL)
-    //     {
-    //         printf("There was an error while trying to change working directory");
-    //         return NULL;
-    //     }
+    // RECEIVING MESSAGE
+    int num_chunks = 0;
+    if (receive_int(&num_chunks, rtable->sockfd) == -1)
+    {
+        fprintf(stderr, "Error receiving file information from server\n");
+        return -1;
+    }
 
-    //     int first_index = first_separator - working_dir;
-    //     int last_index = last_separator - working_dir;
+    if (num_chunks == -1)
+    {
+        fprintf(stderr, "Error receiving file information from server\n");
+        return -1;
+    }
 
-    //     // is at root of the file system
-    //     if (first_index == last_index)
-    //     {
-    //         new_path = malloc(sizeof(char) * 2);
-    //         new_path = strncpy(new_path, working_dir, 1);
-    //         new_path[1] = '\0';
+    Chunk chunks[num_chunks];
+    uint64_t file_size = 0;
 
-    //         return new_path;
-    //     }
+    for (int i = 0; i < num_chunks; i++)
+    {
+        // receive chunk size
+        size_t current_chunk_size = 0;
+        if (recv(rtable->sockfd, &current_chunk_size, sizeof(size_t), 0) == -1)
+        {
+            fprintf(stderr, "Error receiving file chunk size\n");
+            return -1;
+        }
+        // receive chunk        
+        char buffer[current_chunk_size];
 
-    //     new_path = malloc(sizeof(char) * (last_index + 1)); // index starts at zero and the '\0'
+        if (recv(rtable->sockfd, &buffer, current_chunk_size, 0) == -1)
+        {
+            fprintf(stderr, "Error reading file stream. Aborting file transfer...\n");
+            return -1;
+        }
 
-    //     if (new_path == NULL)
-    //     {
-    //         printf("Error while trying to change working dir");
-    //         return NULL;
-    //     }
+        // deserialized chunk
+        Chunk current_chunk;
+        deserialize_chunk(&current_chunk, buffer);
+        // add it to chunk array
+        chunks[i] = current_chunk;
+        // calculate total file size based on each chunk size
+        fprintf(stderr, "Updating file size...\n");
+        file_size += current_chunk.size;
+        fprintf(stderr, "New file size: %ld\n", file_size);
+        
+    }
 
-    //     new_path = strncpy(new_path, working_dir, last_index);
-    //     new_path[last_index] = '\0';
+    // rebuild file based on array of chunks and file size
+    // free all the memory used for recreating the file (chunk array)
 
-    //     return new_path;
-    // }
-
-    // new_path = strdup(path);
-
-    // dir_stream = opendir(new_path); // try path to see if is a absolute path
-
-    // if (dir_stream == NULL)
-    // {
-    //     free(new_path);
-    //     new_path = malloc(sizeof(char) * (strlen(path) + strlen(working_dir) + strlen(kPathSeparator) + 1));
-    //     new_path = strcpy(new_path, working_dir);
-    //     new_path = strcat(new_path, kPathSeparator);
-    //     new_path = strcat(new_path, path);
-
-    //     dir_stream = opendir(new_path); // test for a folder already in the working dir
-    //     if (dir_stream == NULL)
-    //     {
-    //         printf("No such file or directory\n");
-    //         free(new_path);
-    //         return NULL;
-    //     }
-    //     return new_path;
-    // }
-
-
-//              LS
-
-// DIR *dir_stream;
-    // struct dirent *dir_read;
-    // struct stat mystat;
-    // char buf[512];
-    // char *new_path;
-
-    // if (path == NULL)
-    // {
-    //     new_path = strdup(working_dir);
-    // }
-    // else
-    // {
-    //     new_path = strdup(path);
-    // }
-
-    // dir_stream = opendir(new_path); // try path to see if is a absolute path
-
-    // if (dir_stream == NULL)
-    // {
-    //     free(new_path);
-    //     new_path = malloc(sizeof(char) * (strlen(path) + strlen(working_dir) + strlen(kPathSeparator) + 1));
-    //     new_path = strcpy(new_path, working_dir);
-    //     new_path = strcat(new_path, kPathSeparator);
-    //     new_path = strcat(new_path, path);
-
-    //     dir_stream = opendir(new_path); // test for a folder already in the working dir
-    //     if (dir_stream == NULL)
-    //     {
-    //         printf("No such file or directory\n");
-    //         free(new_path);
-    //         return -1;
-    //     }
-    // }
-
-    // printf("%s\n", new_path);
-    // printf("│\n");
-
-    // // read the contents of dir:
-    // while ((dir_read = readdir(dir_stream)) != NULL)
-    // {
-    //     sprintf(buf, "%s/%s", new_path, dir_read->d_name);
-    //     stat(buf, &mystat);
-
-    //     if (strcmp(dir_read->d_name, ".") == 0 || strcmp(dir_read->d_name, "..") == 0)
-    //     {
-    //         printf("├─ %s \n", dir_read->d_name);
-    //     }
-    //     else
-    //     {
-    //         printf("├─ %s \t\t\t%ld bytes\n", dir_read->d_name, mystat.st_size);
-    //     }
-    // }
-
-    // // close the directory
-    // if (closedir(dir_stream) == -1)
-    // {
-    //     perror("Can't close the dir \n");
-    //     free(new_path);
-    //     return -1;
-    // }
-
-    // free(new_path);
+    return 0;
+}
