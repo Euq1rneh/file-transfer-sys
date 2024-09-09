@@ -87,3 +87,35 @@ int read_all(int fd, void *buf, int len) {
     }
     return bufsize;
 }
+
+
+void pack_size_t(unsigned char *buffer, size_t value) {
+    for (int i = sizeof(size_t) - 1; i >= 0; --i) {
+        buffer[i] = value & 0xFF;
+        value >>= 8;
+    }
+}
+
+size_t unpack_size_t(unsigned char *buffer) {
+    size_t value = 0;
+    for (int i = 0; i < sizeof(size_t); ++i) {
+        value = (value << 8) | buffer[i];
+    }
+    return value;
+}
+
+// uint64_t uint64_to_networkByteOrder(uint64_t value) {
+//     if (__BYTE_ORDER == __LITTLE_ENDIAN) {
+//         return ((uint64_t)htonl(value & 0xFFFFFFFF) << 32) | htonl(value >> 32);
+//     } else {
+//         return value;
+//     }
+// }
+
+// uint64_t networkByteOrder_to_uint64(uint64_t value) {
+//     if (__BYTE_ORDER == __LITTLE_ENDIAN) {
+//         return ((uint64_t)ntohl(value & 0xFFFFFFFF) << 32) | ntohl(value >> 32);
+//     } else {
+//         return value;
+//     }
+// }

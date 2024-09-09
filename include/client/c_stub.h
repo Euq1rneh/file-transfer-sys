@@ -8,6 +8,7 @@
 
 #include "c_private.h"
 #include "c_network.h"
+#include "serialization.h"
 #include "globals.h"
 #include "structures.h"
 

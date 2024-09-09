@@ -360,9 +360,12 @@ int handle_get(int client_socket, char *path, char *wd)
     {   
         size_t chunk_size = 0;
         serialize_chunk(chunks[i], serialized_chunk, &chunk_size);
-        // send the chunk size
-
         
+        // send the chunk size
+        unsigned char buffer[sizeof(size_t)];
+        pack_size_t(buffer, chunk_size);
+
+        send(client_socket, buffer, sizeof(size_t));
 
         // send the chunk
         send(client_socket, chunks[i], chunk_size);
@@ -418,6 +421,9 @@ int handle_client(char *wd, int sockfd)
         fprintf(stderr, "Could not process command with code %d", msg->operation);
         break;
     }
+
+    free(msg->data);
+    free(msg);
 
     return 0;
 }

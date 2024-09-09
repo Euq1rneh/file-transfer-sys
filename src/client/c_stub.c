@@ -92,6 +92,8 @@ char *change_working_dir(char *path, struct rtable_t *rtable)
         msg->size = path_size + 1;
     }
 
+    serialize_message(msg, buffer, msg_size);
+
     if(write_all(rtable->sockfd, msg, sizeof(struct Message)) == -1){
         fprintf(stderr, "Error while trying to write message to server. Closing program\n");
         exit(-1);

@@ -33,4 +33,10 @@ int write_all(int fd, void *buf, int len);
 /// @return the number of bytes read, -1 in case of error or 0 if EOF
 int read_all(int fd, void *buf, int len); 
 
+void pack_size_t(unsigned char *buffer, size_t value);
+size_t unpack_size_t(unsigned char *buffer); 
+
+// uint64_t uint64_to_networkByteOrder(uint64_t value);
+// uint64_t networkByteOrder_to_uint64(uint64_t value);
+
 #endif
