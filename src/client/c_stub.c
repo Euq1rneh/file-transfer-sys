@@ -134,6 +134,65 @@ char *change_working_dir(char *path, struct rtable_t *rtable)
 
 int list_files(char *path, char *working_dir, struct rtable_t *rtable)
 {
+    Message msg;
+    msg.operation = 1;
+
+    if (path == NULL)
+    {
+        msg.data = "";
+        msg.size = 0;
+    }
+    else
+    {
+        msg.data = path;
+        msg.size = strlen(path) + 1;
+    }
+
+    // SENDING MESSAGE
+    size_t total_size = sizeof(int) + sizeof(size_t) + msg.size;
+    char *buffer = malloc(total_size);
+
+    serialize_message(&msg, buffer, &total_size);
+
+    total_size = to_network_size(total_size);
+
+    if (send(rtable->sockfd, &total_size, sizeof(size_t), 0) == -1)
+    {
+        fprintf(stderr, "Error sending message size\n");
+        return NULL;
+    }
+
+    if (send(rtable->sockfd, buffer, total_size, 0) == -1)
+    {
+        fprintf(stderr, "Error sending message to server\n");
+        return NULL;
+    }
+
+    // TODO memory cleanup from the serialization
+
+    // RECEIVING MESSAGE
+
+    size_t recv_msg_size = 0;
+
+    if (recv(rtable->sockfd, recv_msg_size, sizeof(size_t), 0) == -1)
+    {
+        fprintf(stderr, "Error receiving message size from server\n");
+        return NULL;
+    }
+
+    char buffer[recv_msg_size];
+
+    if (recv(rtable->sockfd, &buffer, recv_msg_size, 0) == -1)
+    {
+        fprintf(stderr, "Error receiving message from server\n");
+        return NULL;
+    }
+
+    deserialize_message(buffer, &msg);
+
+    //print List of dirs received
+
+    // TODO memory cleanup from deserializing message
 }
 
 int get_file(char *path, struct rtable_t *rtable)

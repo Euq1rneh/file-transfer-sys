@@ -359,10 +359,10 @@ int handle_get(int client_socket, char *path, char *wd)
     unsigned char *serialized_chunk;
 
     for (size_t i = 0; i < nChunks; i++)
-    {   
+    {
         size_t chunk_size = 0;
         serialize_chunk(chunks[i], serialized_chunk, &chunk_size);
-        
+
         // send the chunk size
         unsigned char buffer[sizeof(size_t)];
         pack_size_t(buffer, chunk_size);
@@ -390,29 +390,19 @@ int handle_get(int client_socket, char *path, char *wd)
 
 int handle_client(char *wd, int sockfd)
 {
-    Message *msg = malloc(sizeof(Message));
-
-    if (msg == -1)
-    {
-        fprintf(stderr, "Error allocating memory\n");
-        exit(-1);
-    }
-
-    msg = receive(sockfd, ST_MESSAGE);
-
     int r = 0;
 
     switch (msg->operation)
     {
     case 1: // ls comand
-
-        break;
+        handle_ls() break;
 
     case 2: // cd command
 
         break;
     case 3: // get command
-        if(handle_get(sockfd, msg->data, wd) == -1){
+        if (handle_get(sockfd, msg->data, wd) == -1)
+        {
             fprintf(stderr, "---ERR:Could not process get request---\n");
         }
         break;
@@ -423,9 +413,6 @@ int handle_client(char *wd, int sockfd)
         fprintf(stderr, "Could not process command with code %d", msg->operation);
         break;
     }
-
-    free(msg->data);
-    free(msg);
 
     return 0;
 }
