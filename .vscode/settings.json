@@ -10,6 +10,8 @@
         "s_utils.h": "c",
         "s_skel.h": "c",
         "stdlib.h": "c",
-        "stdint.h": "c"
+        "stdint.h": "c",
+        "c_utils.h": "c",
+        "logger.h": "c"
     }
 }

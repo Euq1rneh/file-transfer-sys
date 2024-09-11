@@ -392,16 +392,36 @@ int handle_client(char *wd, int sockfd)
 {
     int r = 0;
 
-    switch (msg->operation)
+    Message msg;
+    size_t msg_size = 0;
+
+    if(recv(sockfd, &msg_size, sizeof(size_t), 0) == -1){
+        fprintf(stderr, "Error receiving message size\n");
+        return -1;
+    }
+
+    char buffer[msg_size];
+
+    if(recv(sockfd, &buffer, msg_size, 0) == -1){
+        fprintf(stderr, "Error receiving message\n");
+        return -1;
+    }
+
+    if(deserialize_message(buffer, &msg) == -1){
+        fprintf(stderr, "Error deserializing message\n");
+        return -1;
+    }
+
+    switch (msg.operation)
     {
     case 1: // ls comand
-        handle_ls() break;
-
+        handle_ls(msg.data, wd);
+        break;
     case 2: // cd command
 
         break;
     case 3: // get command
-        if (handle_get(sockfd, msg->data, wd) == -1)
+        if (handle_get(sockfd, msg.data, wd) == -1)
         {
             fprintf(stderr, "---ERR:Could not process get request---\n");
         }
