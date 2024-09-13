@@ -7,7 +7,7 @@
 /// @brief Prints a progress bar
 /// @param count the current value
 /// @param max the maximum value
-void print_progress(size_t count, size_t max);
+void print_progress(size_t count, size_t max, char* progress_title);
 
 /// @brief Reads a string of unknown size from stdin. The resulting string must be freed
 /// @return the string that was read or NULL if there was an error
@@ -20,7 +20,8 @@ char *read_stdin();
 /// @return return a list a list of substrings of the original string separated by the delimiter and the size of the array in the array_size param
 char** str_split(const char *str, const char *delimiter, int *size);
 
-char *get_separator();
+
+void clean_chunks(Chunk **chunks, int num_chunks);
 
 /// @brief Rebuilds the original file using the chunks received from the server
 /// @param chunks the array that contains all the file chunks

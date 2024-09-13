@@ -70,7 +70,7 @@ void *deserialize(void *data, StructTypes expected_Type)
     }
 }
 
-size_t serialize_message(Message *msg, char **buffer, size_t messag_size)
+size_t serialize_message(Message *msg, char *buffer, size_t messag_size)
 {
     int operation_net = to_network_int(msg->operation);
     size_t size_net = to_network_size(msg->size);
@@ -83,7 +83,6 @@ size_t serialize_message(Message *msg, char **buffer, size_t messag_size)
     memcpy(*buffer + sizeof(int) + sizeof(size_t), msg->data, msg->size);
 }
 
-// Serializes the Chunk struct into a buffer
 void serialize_chunk(struct Chunk *chunk, char **buffer, size_t *total_size) {
     *total_size = sizeof(int) + sizeof(uint64_t) + chunk->size;
     *buffer = malloc(*total_size);

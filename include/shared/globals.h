@@ -36,7 +36,9 @@ int read_all(int fd, void *buf, int len);
 void pack_size_t(unsigned char *buffer, size_t value);
 size_t unpack_size_t(unsigned char *buffer); 
 
-// uint64_t uint64_to_networkByteOrder(uint64_t value);
-// uint64_t networkByteOrder_to_uint64(uint64_t value);
+
+int send_packet(char *packet, size_t buffer_size, int sockfd);
+int receive_packet(char *packet, size_t buffer_size, int sockfd);
+void safe_malloc(size_t size, void *buffer);
 
 #endif

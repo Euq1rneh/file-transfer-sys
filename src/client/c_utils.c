@@ -2,13 +2,14 @@
 
 #define SIZE 256
 
-void print_progress(size_t count, size_t max)
+void print_progress(size_t count, size_t max, char *progress_title)
 {
     const int bar_width = 50;
 
     float progress = (float)count / max;
     int bar_length = progress * bar_width;
 
+    printf("%s\n", progress_title);
     printf("\rProgress: [");
     for (int i = 0; i < bar_length; ++i)
     {
@@ -107,22 +108,39 @@ char **str_split(const char *str, const char *delimiter, int *size)
     return result;
 }
 
+void clean_chunks(Chunk **chunks, int num_chunks)
+{
 
-int rebuild_file(struct Chunk *chunks, int num_chunks, char *filepath) {
+    for (int i = 0; i < num_chunks; i++)
+    {
+        free(chunks[i]);
+    }
+
+    free(chunks);
+}
+
+int rebuild_file(Chunk **chunks, int num_chunks, char *filepath)
+{
     FILE *file = fopen(filepath, "wb");
-    if (file == NULL) {
+    if (file == NULL)
+    {
         perror("Error opening file for writing");
         return -1;
     }
+    int progress = 0;
+    print_progress(progress, num_chunks, "Rebuilding File");
+    for (int i = 0; i < num_chunks; i++)
+    {
+        size_t bytes_written = fwrite(chunks[i]->chunk, sizeof(unsigned char), chunks[i]->size, file);
 
-    for (int i = 0; i < num_chunks; i++) {
-        size_t bytes_written = fwrite(chunks[i].chunk, sizeof(unsigned char), chunks[i].size, file);
-
-        if (bytes_written != chunks[i].size) {
-            perror("Error writing chunk data to file");
+        if (bytes_written != chunks[i]->size)
+        {
+            fprintf(stderr, "Error writing chunk data to file\n");
             fclose(file);
             return -1;
         }
+        progress++;
+        print_progress(progress, num_chunks, "Rebuilding File");
     }
 
     fclose(file);

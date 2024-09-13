@@ -2,28 +2,22 @@
 
 struct rtable_t *rtable_connect(char *address, char *port)
 {
-    // verificação de erros
     if (address == NULL || port == NULL)
     {
         return NULL;
     }
 
-    // converção para inteiro
     int p = atoi(port);
-    // alocar memória para rtable
     struct rtable_t *rtable = (struct rtable_t *)malloc(sizeof(struct rtable_t));
 
-    // verificação de erros
     if (rtable == NULL)
     {
         return NULL;
     }
 
-    // Preencher a estrutura rtable com as informações necessárias
     rtable->server_address = strdup(address);
     rtable->server_port = p;
 
-    // Estabelecer a conexão com o servidor
     if (network_connect(rtable) == -1)
     {
         free(rtable->server_address);
@@ -36,13 +30,11 @@ struct rtable_t *rtable_connect(char *address, char *port)
 
 int rtable_disconnect(struct rtable_t *rtable)
 {
-    // verificação de erros
     if (rtable == NULL)
     {
         return -1;
     }
 
-    // Fechar a conexão com o servidor
     if (network_close(rtable) == -1)
     {
         if (rtable->server_address != NULL)
@@ -53,13 +45,11 @@ int rtable_disconnect(struct rtable_t *rtable)
         return -1;
     }
 
-    // destruição de memória alocada
     if (rtable->server_address != NULL)
     {
         free(rtable->server_address);
     }
 
-    // destruição de memória alocada
     free(rtable);
 
     return 0;
@@ -77,5 +67,64 @@ int list_files(char *path, char *working_dir, struct rtable_t *rtable)
 
 int get_file(char *path, struct rtable_t *rtable)
 {
+    if(path == NULL){
+        fprintf(stderr, "No file path specified\n");
+        return -1;
+    }
+
+    Message msg;
+
+    size_t path_len = strlen(path);
+
+    msg.operation = 3;
+    msg.size = path_len;
+    msg.data = path;
+
+    char *buffer;
+    size_t buffer_size = sizeof(int) + sizeof(size_t) + path_len;
+    safe_malloc(buffer_size, buffer);
+    serialize_message(&msg, buffer, buffer_size);
+
+    if(send_packet(buffer, buffer_size, rtable->sockfd) == -1){
+        return -1;
+    }
+    free(buffer);
+
+    int num_chunks = 0;
+    int progress_count = 0;
+
+
+    if(recv(rtable->sockfd, &num_chunks, sizeof(int), 0) == -1){
+        fprintf(stderr, "Error could not receive data from server: could not receive number of chunks\n");
+        return -1;
+    }
+
+    Chunk **chunks;
+    safe_malloc(sizeof(Chunk) * num_chunks, chunks);
+    print_progress(progress_count, num_chunks, "Chunks Received");
+
+    for (int i = 0; i < num_chunks; i++)
+    {
+        char *buffer;
+        size_t buffer_size;
+        if(receive_packet(buffer, buffer_size, rtable->sockfd) == -1){
+            return -1;
+        }
+
+        Chunk *c;
+        safe_malloc(sizeof(Chunk), c);
+        deserialize_chunk(c, buffer);
+        chunks[i] = c;
+        progress_count++;
+
+        print_progress(progress_count, num_chunks, "Chunks received");
+    }
+    
+    if(rebuild_file(chunks, num_chunks, "test") == -1){
+        return -1;
+    }
+
+    clean_chunks(chunks, num_chunks);
+
     return -1;
 }
