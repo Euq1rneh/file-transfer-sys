@@ -2,6 +2,7 @@
 #define STRUCTURES_
 
 #include <stdio.h>
+#include <stdint.h>
 
 #define CHUNK_SIZE 512000 // 500KiB
 

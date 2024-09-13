@@ -29,34 +29,15 @@ void user_interaction(struct rtable_t *rtable, char *initial_wd)
 
         if (strcmp(command, "quit") == 0 || strcmp(command, "q") == 0)
         {
-            send_int(10, rtable->sockfd); // op_code
-            send_int(0, rtable->sockfd); // param size
-            break;
+            
         }
         else if (strstr(command, "ls") != NULL)
         {
-            args = str_split(command, " ", &array_size);
-
-            int r = array_size == 1 ? list_files(NULL, working_dir, rtable) : list_files(args[1], working_dir, rtable);
-
-            if(r == -1){
-                fprintf(stderr, "Error while running command %s", command);
-            }
+            
         }
         else if (strstr(command, "cd") != NULL)
         {
-            args = str_split(command, " ", &array_size);
-
-            char *new_wd = array_size == 1 ? change_working_dir(NULL, rtable) : change_working_dir(args[1], rtable);
-
-            // there was an error while trying to change working dir
-            if(new_wd == NULL){
-                continue;
-            }
-
-            free(working_dir);
-            working_dir = strdup(new_wd);
-            free(new_wd);
+            
         }
         else
         {

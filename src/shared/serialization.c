@@ -54,12 +54,6 @@ void *deserialize(void *data, StructTypes expected_Type)
         Chunk *chunk;
         deserialize_chunk(data, chunk);
 
-        // if (size == -1)
-        // {
-        //     fprintf(stderr, "Error deserializing chunk\n");
-        //     return NULL;
-        // }
-
         return chunk;
         break;
     case ST_MESSAGE:

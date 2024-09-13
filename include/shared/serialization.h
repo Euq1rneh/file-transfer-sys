@@ -6,7 +6,6 @@
 
 
 #include "structures.h"
-#include "s_utils.h"
 
 size_t to_network_size(size_t host_size);
 size_t to_host_size(size_t net_size);
@@ -42,4 +41,4 @@ void serialize_chunk(struct Chunk *chunk, char **buffer, size_t *total_size);
 /// @param buffer buffer to deserialize
 /// @param chunk output chunk
 /// @return returns the size of the deserialized data
-size_t deserialize_chunk(struct Chunk *chunk, char *buffer);
+void deserialize_chunk(struct Chunk *chunk, char *buffer);
