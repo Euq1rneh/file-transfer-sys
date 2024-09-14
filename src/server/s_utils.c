@@ -11,7 +11,7 @@ size_t file_to_byte_array(char *path, char *buffer)
     if (fileptr == NULL)
     {
         perror("Error opening file");
-        return 0;
+        return -1;
     }
 
     size_t size = get_file_size(fileptr);
@@ -40,10 +40,41 @@ size_t get_file_size(FILE *fd)
 /// @return the size of the chunk
 size_t write_chunk(char *in, char *out, int size, int out_ptr)
 {
-    return -1;
+    for (int i = out_ptr; i < out_ptr + size; i++)
+    {
+    }
+
+    return size;
 }
 
-size_t file_to_chunks(char *buffer, size_t buffer_size, Chunk **chunks)
+int file_to_chunks(char *buffer, char *path, Chunk **chunks)
 {
-    return -1;
+    size_t nbytes = 0;
+    if ((nbytes = file_to_byte_array(path, buffer)) == -1)
+    {
+    }
+
+    int read_ptr = 0;
+    int num_chunks = (nbytes + CHUNK_SIZE - 1) / CHUNK_SIZE;
+
+    if (num_chunks < 1)
+    {
+        fprintf(stderr, "Number of chunks is invalid\n");
+        return -1;
+    }
+
+    safe_malloc(sizeof(Chunk) * num_chunks, chunks);
+
+    for (int i = 0; i < num_chunks; i++)
+    {
+        safe_malloc(sizeof(Chunk), chunks[i]);
+        int to_read = num_chunks + read_ptr == nbytes ? nbytes - read_ptr : CHUNK_SIZE;
+
+        chunks[i]->index = i;
+        chunks[i]->size = to_read;
+
+        memcpy(chunks[i]->chunk, buffer + read_ptr, to_read);
+    }
+
+    return num_chunks;
 }

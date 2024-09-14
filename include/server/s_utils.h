@@ -4,6 +4,7 @@
 #include <unistd.h>
 
 #include "structures.h"
+#include "globals.h"
 
 int copy_to_from(void *dst, void *src, int src_start, size_t size);
 
@@ -15,4 +16,4 @@ size_t file_to_byte_array(char *path, char *buffer);
 
 size_t get_file_size(FILE *fd);
 
-size_t file_to_chunks(char *buffer, size_t buffer_size, Chunk **chunks);
+int file_to_chunks(char *buffer, char *path, Chunk **chunks);

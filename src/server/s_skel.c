@@ -27,33 +27,35 @@ int handle_ls(char *path, char *wd, Package *pkg)
 
 int handle_get(int client_socket, char *path, char *wd)
 {
+    if(file_exists(path) == -1){
+        if(send_int(-1, client_socket) == -1){
+            fprintf(stderr, "Error sending message to client\n");
+            return -1;
+        }        
+    }
+
+    char *file_buf;
+    Chunk **chunks;
+
+    file_to_chunks(file_buf, path, chunks);
+   
+
+
+
     return 0;
 }
 
 int handle_client(char *wd, int sockfd)
 {
-    int r = 0;
-
     Message msg;
-    size_t msg_size = 0;
+    size_t buffer_size = 0;
+    char *buffer;
 
-    //get msg size
-    if(recv(sockfd, &msg_size, sizeof(size_t), 0) == -1){
-        fprintf(stderr, "Error receiving message size\n");
+    if(receive_packet(buffer, buffer_size, sockfd) == -1){
         return -1;
     }
 
-    char buffer[msg_size];
-    //get msg
-    if(recv(sockfd, &buffer, msg_size, 0) == -1){
-        fprintf(stderr, "Error receiving message\n");
-        return -1;
-    }
-
-    if(deserialize_message(buffer, &msg) == -1){
-        fprintf(stderr, "Error deserializing message\n");
-        return -1;
-    }
+    deserialize_message(buffer, &msg);
 
     switch (msg.operation)
     {
@@ -67,7 +69,7 @@ int handle_client(char *wd, int sockfd)
     case 3: // get command
         if (handle_get(sockfd, msg.data, wd) == -1)
         {
-            fprintf(stderr, "---ERR:Could not process get request---\n");
+            fprintf(stderr, "GET error: could not process get request\n");
         }
         break;
     case 10: // quit

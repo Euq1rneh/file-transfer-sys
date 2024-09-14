@@ -67,7 +67,8 @@ int list_files(char *path, char *working_dir, struct rtable_t *rtable)
 
 int get_file(char *path, struct rtable_t *rtable)
 {
-    if(path == NULL){
+    if (path == NULL)
+    {
         fprintf(stderr, "No file path specified\n");
         return -1;
     }
@@ -85,7 +86,8 @@ int get_file(char *path, struct rtable_t *rtable)
     safe_malloc(buffer_size, buffer);
     serialize_message(&msg, buffer, buffer_size);
 
-    if(send_packet(buffer, buffer_size, rtable->sockfd) == -1){
+    if (send_packet(buffer, buffer_size, rtable->sockfd) == -1)
+    {
         return -1;
     }
     free(buffer);
@@ -93,9 +95,14 @@ int get_file(char *path, struct rtable_t *rtable)
     int num_chunks = 0;
     int progress_count = 0;
 
-
-    if(recv(rtable->sockfd, &num_chunks, sizeof(int), 0) == -1){
+    if (receive_int(&num_chunks, rtable->sockfd) == -1)
+    {
         fprintf(stderr, "Error could not receive data from server: could not receive number of chunks\n");
+        return -1;
+    }
+
+    if(num_chunks == -1){
+        fprintf(stderr, "File does not exist\n");
         return -1;
     }
 
@@ -107,7 +114,8 @@ int get_file(char *path, struct rtable_t *rtable)
     {
         char *buffer;
         size_t buffer_size;
-        if(receive_packet(buffer, buffer_size, rtable->sockfd) == -1){
+        if (receive_packet(buffer, buffer_size, rtable->sockfd) == -1)
+        {
             return -1;
         }
 
@@ -119,8 +127,9 @@ int get_file(char *path, struct rtable_t *rtable)
 
         print_progress(progress_count, num_chunks, "Chunks received");
     }
-    
-    if(rebuild_file(chunks, num_chunks, "test") == -1){
+
+    if (rebuild_file(chunks, num_chunks, "test") == -1)
+    {
         return -1;
     }
 
