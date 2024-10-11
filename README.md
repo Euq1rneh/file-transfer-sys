@@ -1,17 +1,10 @@
 # Simple File Transfer System
 
-This project allows the user to connect to a "server" navigate and transfer files from the server directories.
+WARNING: This project was archived because of the spagueti code and lack of time 
 
-## Table of Contents
-- [Usage](#usage)
-- [Features](#features)
-- [Contributing](#contributing)
-- [License](#license)
-- [Contact](#contact)
+This project allows the user to connect to a "server" navigate and transfer files from the server directories.
 
 ## USAGE
     -Server: ./sftp_server <port>
     -Client: ./sftp_client <server-ip> <port>
-
-## Features
 
